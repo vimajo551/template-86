@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   Text
 } from "react-native";
-
+import firebase from "firebase"
 import { RFValue } from "react-native-responsive-fontsize";
 import * as Font from "expo-font";
 
@@ -30,6 +30,9 @@ export default class RegisterScreen extends Component {
     this.state = {
       email: "",
       password: "",
+      first_name: "",
+      last_name: "",
+      confirm_password: "",
       fontsLoaded: false
     };
   }
@@ -42,7 +45,23 @@ export default class RegisterScreen extends Component {
     this._loadFontsAsync();
   }
 
-
+  registerUser = (email,password,confirm_password,first_name,last_name) => {
+    if(password == confirm_password){
+      firebase.auth().createUserWithEmailAndPassword(email,password)
+      .then((userCredential) => {
+        alert("usuario registrado")
+        this.props.navigation.replace("Login")
+        firebase.database().ref("/users/"+userCredential.user.uid).set({
+          email: userCredential.user.email,
+          first_name: first_name,
+          last_name: last_name
+        })
+      })
+      .catch(error => alert(error.message))
+    }else{
+      alert("senha incompativel")
+    }
+  }
   render() {
     if (this.state.fontsLoaded) {
       SplashScreen.hideAsync();
@@ -55,7 +74,21 @@ export default class RegisterScreen extends Component {
           <Text style={styles.appTitleText}>Registrar</Text>
 
           {/* Adicione código para criar mais duas entradas de texto para nome e sobrenome */}
+          <TextInput
+            style={styles.textinput}
+            onChangeText={text => this.setState({ first_name: text })}
+            placeholder={"Digite o seu primeiro nome"}
+            placeholderTextColor={"#FFFFFF"}
 
+          />
+
+          <TextInput
+            style={styles.textinput}
+            onChangeText={text => this.setState({ last_name: text })}
+            placeholder={"Digite o seu sobrenome"}
+            placeholderTextColor={"#FFFFFF"}
+
+          />
 
           <TextInput
             style={styles.textinput}
@@ -72,16 +105,26 @@ export default class RegisterScreen extends Component {
             secureTextEntry
           />
 
-          {/* Adicione o código para criar mais uma entrada de texto para confirmar a senha */}
+          <TextInput
+            style={styles.textinput}
+            onChangeText={text => this.setState({ confirm_password: text })}
+            placeholder={"Digite a senha novamente"}
+            placeholderTextColor={"#FFFFFF"}
+            secureTextEntry
+          />
 
 
           <TouchableOpacity
             style={[styles.button, { marginTop: 20 }]}
-
+            onPress = {() => this.resgisterUser(email,password,confirm_password,first_name,last_name)}
           >
             <Text style={styles.buttonText}>Registrar</Text>
           </TouchableOpacity>
-          
+          <TouchableOpacity
+            onPress = {() => this.props.navigation.replace("Login")}
+          >
+            <Text style={styles.buttonText}>Registrar</Text>
+          </TouchableOpacity>
         </View>
       );
     }
