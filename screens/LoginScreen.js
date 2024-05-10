@@ -46,7 +46,11 @@ export default class LoginScreen extends Component {
 
   signIn = async (email, password) => {
     /*escreva o código para autenticar o usuário usando e-mail e senha. */
-
+    firebase.auth().signInWithEmailAndPassword(email,password).then(
+      () => {
+        this.props.navigation.replace("Dashboard")
+      }
+    ).catch(error => {alert(error.message)})
 
 
 
@@ -82,11 +86,15 @@ export default class LoginScreen extends Component {
           />
           <TouchableOpacity
             style={[styles.button, { marginTop: 20 }]}
-            
+            onPress = {() => this.signIn(email,password)}
           >
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
-          
+          <TouchableOpacity
+          onPress = {() => this.props.navigation.navigate("RegisterScreen")}
+          >
+            <Text style={styles.buttonTextNewUser}>novo usuário?</Text>
+          </TouchableOpacity>
         </View>
       );
     }
